@@ -132,4 +132,10 @@ set_target_properties(thrift-compiler PROPERTIES OUTPUT_NAME thrift)
 
 target_link_libraries(thrift-compiler libparse)
 
-install(TARGETS thrift-compiler DESTINATION "${BIN_INSTALL_DIR}")
+set(CMAKE_BUILD_TYPE Debug)
+
+#install(
+#    TARGETS thrift-compiler
+#    DESTINATION "${BIN_INSTALL_DIR}"
+#    RUNTIME DESTINATION "${BIN_INSTALL_DIR}"
+#)

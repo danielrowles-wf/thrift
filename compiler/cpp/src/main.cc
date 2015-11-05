@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <limits.h>
+#include <typeinfo>
 
 #ifdef _WIN32
 #include <windows.h> /* for GetFullPathName */
@@ -981,6 +982,35 @@ void parse(t_program* program, t_program* parent_program) {
 }
 
 /**
+ * Patch code
+ * Workiva Shiz
+ */
+void mangle(t_program* program) {
+  t_struct * workiva_header = new t_struct (program, "WorkivaHeader");
+  t_field * hf1 = new t_field (g_type_string, "CorrelationId", 1);
+  t_field * hf2 = new t_field (g_type_i16, "HopCount", 2);
+  t_field * hf3 = new t_field (g_type_bool, "ShouldTrack", 3);
+
+  workiva_header->append(hf1);
+  workiva_header->append(hf2);
+  workiva_header->append(hf3);
+
+  program->add_struct(workiva_header);
+
+  vector<t_service*> services = program->get_services();
+  vector<t_service*>::iterator s_iter;
+  for (s_iter = services.begin(); s_iter != services.end(); ++s_iter) {
+    vector<t_function*> functions = (*s_iter)->get_functions();
+    vector<t_function*>::iterator f_iter;
+    for (f_iter = functions.begin(); f_iter != functions.end(); ++f_iter) {
+      t_struct * args = (*f_iter)->get_arglist();
+      t_field * newfld = new t_field (workiva_header, "Header");
+      args->append(newfld);
+    }
+  }
+}
+
+/**
  * Generate code
  */
 void generate(t_program* program, const vector<string>& generator_strings) {
@@ -1005,7 +1035,6 @@ void generate(t_program* program, const vector<string>& generator_strings) {
     if (dump_docs) {
       dump_docstrings(program);
     }
-
     vector<string>::const_iterator iter;
     for (iter = generator_strings.begin(); iter != generator_strings.end(); ++iter) {
       t_generator* generator = t_generator_registry::get_generator(program, *iter);
@@ -1278,6 +1307,7 @@ int main(int argc, char** argv) {
     yylineno = 1;
 
     // Generate it!
+    mangle(program);
     generate(program, generator_strings);
     delete program;
   }

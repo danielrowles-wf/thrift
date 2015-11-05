@@ -891,6 +891,7 @@ void t_go_generator::generate_typedef(t_typedef* ttypedef) {
   // (which may be a constant) into a pointer to an instance of a type.
   f_types_ << "func " << new_type_name << "Ptr(v " << new_type_name << ") *" << new_type_name
            << " { return &v }" << endl << endl;
+
 }
 
 /**
@@ -1925,6 +1926,7 @@ void t_go_generator::generate_service_client(t_service* tservice) {
     indent_up();
     std::string argsname = publicize((*f_iter)->get_name() + "_args", true);
     // Serialize the request header
+    f_service_ << indent() << "// WORKIVA MODIFICATION - TODO" << endl;
     f_service_ << indent() << "oprot := p.OutputProtocol" << endl;
     f_service_ << indent() << "if oprot == nil {" << endl;
     f_service_ << indent() << "  oprot = p.ProtocolFactory.GetProtocol(p.Transport)" << endl;
